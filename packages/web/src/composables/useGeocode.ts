@@ -15,6 +15,7 @@ export interface GeocodingResult {
   coordinates: Coordinates | null
   confidence: Confidence | null
   label: string | null
+  source: "MML" | "Nominatim" | null
   error: string | null
 }
 

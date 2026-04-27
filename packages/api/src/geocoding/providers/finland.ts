@@ -2,6 +2,7 @@ import type { GeocodingProvider, GeocodingResult, NormalizedAddress } from "../t
 import { normalizeAddress, validateFinnishPostalCode } from "../../utils/normalize"
 
 const MML_BASE_URL = "https://avoin-paikkatieto.maanmittauslaitos.fi/geocoding/v2/pelias/search"
+const NOMINATIM_BASE_URL = "https://nominatim.openstreetmap.org/search"
 
 interface MMLFeature {
   geometry: {
@@ -17,6 +18,14 @@ interface MMLFeature {
 
 interface MMLResponse {
   features: MMLFeature[]
+}
+
+interface NominatimResult {
+  lat: string
+  lon: string
+  display_name: string
+  type: string
+  importance: number
 }
 
 export class FinlandProvider implements GeocodingProvider {
@@ -40,7 +49,7 @@ export class FinlandProvider implements GeocodingProvider {
 
     try {
       const result = await this.queryMML(normalized.raw)
-      if (result) return result
+      if (result) return { ...result, input: address }
 
       if (normalized.postalCode && normalized.city) {
         const withoutPostal = normalized.raw.replace(normalized.postalCode, "").trim()
@@ -48,11 +57,15 @@ export class FinlandProvider implements GeocodingProvider {
         if (fallback) return { ...fallback, input: address }
       }
 
+      const nominatimResult = await this.queryNominatim(normalized.raw)
+      if (nominatimResult) return { ...nominatimResult, input: address }
+
       return {
         input: address,
         coordinates: null,
         confidence: null,
         label: null,
+        source: null,
         error: "No results found",
       }
     } catch (err) {
@@ -61,6 +74,7 @@ export class FinlandProvider implements GeocodingProvider {
         coordinates: null,
         confidence: null,
         label: null,
+        source: null,
         error: err instanceof Error ? err.message : "Unknown error",
       }
     }
@@ -97,6 +111,48 @@ export class FinlandProvider implements GeocodingProvider {
         accuracy: feature.properties.accuracy,
       },
       label: feature.properties.label,
+      source: "MML",
+      error: null,
+    }
+  }
+
+  private async queryNominatim(query: string): Promise<GeocodingResult | null> {
+    const url = new URL(NOMINATIM_BASE_URL)
+    url.searchParams.set("q", `${query}, Finland`)
+    url.searchParams.set("format", "json")
+    url.searchParams.set("limit", "1")
+    url.searchParams.set("addressdetails", "1")
+
+    const response = await fetch(url.toString(), {
+      headers: {
+        "User-Agent": "pond-feather-snake-geocoder/0.1.0",
+      },
+    })
+
+    if (!response.ok) {
+      return null
+    }
+
+    const data = (await response.json()) as NominatimResult[]
+
+    if (!data || data.length === 0) {
+      return null
+    }
+
+    const result = data[0]
+
+    return {
+      input: query,
+      coordinates: {
+        lat: parseFloat(result.lat),
+        lng: parseFloat(result.lon),
+      },
+      confidence: {
+        matchType: result.type,
+        accuracy: result.importance > 0.5 ? "high" : "low",
+      },
+      label: result.display_name,
+      source: "Nominatim",
       error: null,
     }
   }

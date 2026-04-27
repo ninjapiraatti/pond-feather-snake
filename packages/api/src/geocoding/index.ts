@@ -31,6 +31,7 @@ export async function batchGeocode(request: BatchGeocodeRequest): Promise<BatchG
         coordinates: null,
         confidence: null,
         label: null,
+        source: null,
         error: `Unsupported country: ${country}`,
       })),
       processed: 0,

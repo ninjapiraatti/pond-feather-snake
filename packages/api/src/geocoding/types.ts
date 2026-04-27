@@ -11,6 +11,7 @@ export interface GeocodingResult {
     accuracy?: string
   } | null
   label: string | null
+  source: "MML" | "Nominatim" | null
   error: string | null
 }
 

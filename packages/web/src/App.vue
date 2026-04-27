@@ -33,13 +33,14 @@ function formatConfidence(c: GeocodingResult["confidence"]): string {
 }
 
 function downloadCsv() {
-  const headers = ["input", "lat", "lng", "matchType", "accuracy", "label", "error"]
+  const headers = ["input", "lat", "lng", "matchType", "accuracy", "source", "label", "error"]
   const rows = results.value.map((r) => [
     r.input,
     r.coordinates?.lat ?? "",
     r.coordinates?.lng ?? "",
     r.confidence?.matchType ?? "",
     r.confidence?.accuracy ?? "",
+    r.source ?? "",
     r.label ?? "",
     r.error ?? "",
   ])
@@ -68,6 +69,7 @@ function downloadJson() {
 
 function getStatusClass(result: GeocodingResult): string {
   if (result.error) return "status-error"
+  if (result.source === "Nominatim") return "status-warning"
   if (result.confidence?.matchType === "exact" && result.confidence?.accuracy === "point") {
     return "status-success"
   }
@@ -140,6 +142,7 @@ Hämeentie 135, 00560 Helsinki"
               <th>Latitude</th>
               <th>Longitude</th>
               <th>Match</th>
+              <th>Source</th>
               <th>Label</th>
               <th>Status</th>
             </tr>
@@ -150,6 +153,7 @@ Hämeentie 135, 00560 Helsinki"
               <td>{{ result.coordinates?.lat?.toFixed(6) ?? "-" }}</td>
               <td>{{ result.coordinates?.lng?.toFixed(6) ?? "-" }}</td>
               <td>{{ formatConfidence(result.confidence) }}</td>
+              <td>{{ result.source ?? "-" }}</td>
               <td class="label-cell">{{ result.label ?? "-" }}</td>
               <td>{{ result.error ?? "OK" }}</td>
             </tr>
