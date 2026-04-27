@@ -1,0 +1,10 @@
+{
+  "name": "pond-feather-snake",
+  "private": true,
+  "workspaces": ["packages/*"],
+  "scripts": {
+    "dev": "bun run --filter '*' dev",
+    "dev:api": "bun run --filter api dev",
+    "dev:web": "bun run --filter web dev"
+  }
+}
