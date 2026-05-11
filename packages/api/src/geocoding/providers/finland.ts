@@ -66,6 +66,7 @@ export class FinlandProvider implements GeocodingProvider {
         confidence: null,
         label: null,
         source: null,
+        maakunta: null,
         error: "No results found",
       }
     } catch (err) {
@@ -75,6 +76,7 @@ export class FinlandProvider implements GeocodingProvider {
         confidence: null,
         label: null,
         source: null,
+        maakunta: null,
         error: err instanceof Error ? err.message : "Unknown error",
       }
     }
@@ -112,6 +114,7 @@ export class FinlandProvider implements GeocodingProvider {
       },
       label: feature.properties.label,
       source: "MML",
+      maakunta: null,
       error: null,
     }
   }
@@ -153,6 +156,7 @@ export class FinlandProvider implements GeocodingProvider {
       },
       label: result.display_name,
       source: "Nominatim",
+      maakunta: null,
       error: null,
     }
   }

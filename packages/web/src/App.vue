@@ -33,15 +33,12 @@ function formatConfidence(c: GeocodingResult["confidence"]): string {
 }
 
 function downloadCsv() {
-  const headers = ["input", "lat", "lng", "matchType", "accuracy", "source", "label", "error"]
+  const headers = ["input", "lat", "lng", "maakunta", "error"]
   const rows = results.value.map((r) => [
     r.input,
     r.coordinates?.lat ?? "",
     r.coordinates?.lng ?? "",
-    r.confidence?.matchType ?? "",
-    r.confidence?.accuracy ?? "",
-    r.source ?? "",
-    r.label ?? "",
+    r.maakunta ?? "",
     r.error ?? "",
   ])
 
@@ -57,7 +54,14 @@ function downloadCsv() {
 }
 
 function downloadJson() {
-  const json = JSON.stringify(results.value, null, 2)
+  const exportData = results.value.map((r) => ({
+    input: r.input,
+    lat: r.coordinates?.lat ?? null,
+    lng: r.coordinates?.lng ?? null,
+    maakunta: r.maakunta,
+    error: r.error,
+  }))
+  const json = JSON.stringify(exportData, null, 2)
   const blob = new Blob([json], { type: "application/json" })
   const url = URL.createObjectURL(blob)
   const a = document.createElement("a")
@@ -141,6 +145,7 @@ Hämeentie 135, 00560 Helsinki"
               <th>Input</th>
               <th>Latitude</th>
               <th>Longitude</th>
+              <th>Maakunta</th>
               <th>Match</th>
               <th>Source</th>
               <th>Label</th>
@@ -152,6 +157,7 @@ Hämeentie 135, 00560 Helsinki"
               <td>{{ result.input }}</td>
               <td>{{ result.coordinates?.lat?.toFixed(6) ?? "-" }}</td>
               <td>{{ result.coordinates?.lng?.toFixed(6) ?? "-" }}</td>
+              <td>{{ result.maakunta ?? "-" }}</td>
               <td>{{ formatConfidence(result.confidence) }}</td>
               <td>{{ result.source ?? "-" }}</td>
               <td class="label-cell">{{ result.label ?? "-" }}</td>

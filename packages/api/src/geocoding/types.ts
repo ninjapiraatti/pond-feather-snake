@@ -12,6 +12,7 @@ export interface GeocodingResult {
   } | null
   label: string | null
   source: "MML" | "Nominatim" | null
+  maakunta: string | null
   error: string | null
 }
 

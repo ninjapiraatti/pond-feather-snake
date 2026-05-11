@@ -16,6 +16,7 @@ export interface GeocodingResult {
   confidence: Confidence | null
   label: string | null
   source: "MML" | "Nominatim" | null
+  maakunta: string | null
   error: string | null
 }
 

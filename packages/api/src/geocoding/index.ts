@@ -1,5 +1,6 @@
 import type { GeocodingProvider, BatchGeocodeRequest, BatchGeocodeResponse } from "./types"
 import { FinlandProvider } from "./providers/finland"
+import { getMaakunta } from "../utils/maakunta"
 
 const providers = new Map<string, GeocodingProvider>()
 
@@ -32,6 +33,7 @@ export async function batchGeocode(request: BatchGeocodeRequest): Promise<BatchG
         confidence: null,
         label: null,
         source: null,
+        maakunta: null,
         error: `Unsupported country: ${country}`,
       })),
       processed: 0,
@@ -50,7 +52,10 @@ export async function batchGeocode(request: BatchGeocodeRequest): Promise<BatchG
     }
 
     const result = await provider.geocode(address)
-    results.push(result)
+    const maakunta = result.coordinates
+      ? getMaakunta(result.coordinates.lat, result.coordinates.lng)
+      : null
+    results.push({ ...result, maakunta })
 
     if (result.error) {
       failed++
